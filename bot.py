@@ -17,6 +17,7 @@ import html
 import json
 import os
 import sys
+import webbrowser
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import quote, quote_plus
@@ -49,11 +50,25 @@ REPORT_LINKS = {
 }
 
 
+def app_dir() -> Path:
+    """Dossier du .exe (ou du script) : c'est là qu'on cherche config.yaml et qu'on écrit le rapport."""
+    return Path(sys.executable).parent if getattr(sys, "frozen", False) else Path(__file__).parent
+
+
+# Clés API : variable d'environnement, ou même nom en minuscules dans config.yaml.
+API_KEYS = ("YOUTUBE_API_KEY", "GOOGLE_API_KEY", "GOOGLE_CSE_ID")
+
+
 def load_config(path: Path) -> dict:
+    if not path.exists():
+        sys.exit(f"Fichier {path} introuvable : copiez config.example.yaml en config.yaml.")
     with path.open(encoding="utf-8") as f:
         cfg = yaml.safe_load(f) or {}
     if not cfg.get("keywords"):
         sys.exit("config : la liste 'keywords' est vide.")
+    for name in API_KEYS:
+        if cfg.get(name.lower()) and not os.environ.get(name):
+            os.environ[name] = str(cfg[name.lower()])
     return cfg
 
 
@@ -204,9 +219,11 @@ def render_html(results: list[dict], warnings: list[str], cfg: dict) -> str:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("-c", "--config", default="config.yaml", type=Path)
-    ap.add_argument("-o", "--output", default="rapport.html", type=Path)
-    ap.add_argument("--state", default=".seen.json", type=Path)
+    base = app_dir()
+    ap.add_argument("-c", "--config", default=base / "config.yaml", type=Path)
+    ap.add_argument("-o", "--output", default=base / "rapport.html", type=Path)
+    ap.add_argument("--state", default=base / ".seen.json", type=Path)
+    ap.add_argument("--no-open", action="store_true", help="n'ouvre pas le rapport dans le navigateur")
     args = ap.parse_args()
     cfg = load_config(args.config)
     results, warnings = run(cfg, args.state)
@@ -215,7 +232,19 @@ def main() -> None:
     print(f"{len(results)} résultat(s), dont {n_new} nouveau(x). Rapport : {args.output}")
     for w in warnings:
         print("⚠️ ", w, file=sys.stderr)
+    if not args.no_open:
+        webbrowser.open(args.output.resolve().as_uri())
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except SystemExit as e:
+        if e.code not in (0, None):
+            print(e.code, file=sys.stderr)
+        if getattr(sys, "frozen", False):
+            input("\nAppuyez sur Entrée pour fermer...")
+        raise
+    else:
+        if getattr(sys, "frozen", False):
+            input("\nAppuyez sur Entrée pour fermer...")

@@ -1,0 +1,8 @@
+# Copiez ce fichier en config.yaml et adaptez les mots-clés.
+# Astuce : mettez entre guillemets les expressions exactes.
+keywords:
+  - '"aura battle" PRENOM'
+  - '"aura battle" NOM_DE_L_ECOLE'
+  - '"aura battle" VILLE'
+  - 'PRENOM NOM'
+max_results: 10   # résultats YouTube par mot-clé

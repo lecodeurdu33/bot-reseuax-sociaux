@@ -6,3 +6,8 @@ keywords:
   - '"aura battle" VILLE'
   - 'PRENOM NOM'
 max_results: 10   # résultats YouTube par mot-clé
+
+# Clés API (facultatif ici : peuvent aussi être des variables d'environnement)
+# youtube_api_key: "..."
+# google_api_key: "..."
+# google_cse_id: "..."

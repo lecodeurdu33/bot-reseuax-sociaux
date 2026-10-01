@@ -37,3 +37,11 @@ Les liens de signalement changent parfois : vérifiez-les dans `REPORT_LINKS` de
 ## Tests
 
 `python -m pytest tests`
+
+## Version Windows (bot.exe)
+
+L'exécutable est compilé par GitHub Actions (onglet **Actions → Build bot.exe → Run workflow**, puis télécharger
+l'artefact `bot-reseaux-sociaux`). Dézippez, copiez `config.example.yaml` en `config.yaml` à côté de `bot.exe`,
+remplissez les mots-clés (et les clés API dans le même fichier), puis double-cliquez sur `bot.exe` :
+le rapport s'ouvre dans le navigateur. Windows peut afficher un avertissement SmartScreen (exécutable non signé) :
+« Informations complémentaires → Exécuter quand même ».
